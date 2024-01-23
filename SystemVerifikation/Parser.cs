@@ -53,5 +53,44 @@ namespace SystemVerifikation
             }
             return Wires;
         }
+        public List<Assign> ParseAssigns(string Filepath, List<Wire> Wires) 
+        {  
+            List<Assign> Assigns = new List<Assign>();
+            bool IsParsing = false;
+
+            try
+            {
+                using(StreamReader sr = new StreamReader(Filepath)) 
+                {
+                    string line;
+
+                    while((line = sr.ReadLine()) != null)
+                    {
+                        if (line.Contains("assign"))
+                        {
+                            IsParsing = true;
+                            continue;
+                        }
+                        else if (line.Contains("endmodule"))
+                        {
+                            IsParsing = false;
+                            continue;
+                        }
+                        if (IsParsing == true)
+                        {
+                            // Hier muss für jede Zeile die Wires Liste durchsucht werden und ein Assign Element erstellt werden. Der Assign Konstruktor enthält die Eingangswires, die Ausgangswires und die logischen Operationen
+                            string Ergebnis = Wires.Find(s => s == gesuchterString);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: " + e.Message);
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace SystemVerifikation
 {
-    public class Wire
+    public class Assign
     {
-        public string Name { get; set; }
+        public string Output;
         public List<string> Inputs;
-        public List<string> Outputs;
     }
 }
