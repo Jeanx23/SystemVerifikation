@@ -8,8 +8,6 @@ namespace SystemVerifikation
 {
     public class Wire
     {
-        public string Name { get; set; }
-        public List<string> Inputs;
-        public List<string> Outputs;
+        public string Name { get; set; }        
     }
 }
