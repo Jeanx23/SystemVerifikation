@@ -35,18 +35,39 @@ namespace SystemVerifikation
             if (Operator == "|")
             {
                 if (RightOperand1Value || RightOperand2Value)
-                {                   
-                    LeftOperandValue = true;        
+                {
+                    Wire Result = FindWire(LeftOperand);
+                    Result.InputState = true;
                 }    
             }           
             if (Operator == "&")
             {
                 if(RightOperand1Value && RightOperand2Value)
-                {
-                    LeftOperandValue = true;
+                {                    
+                    Wire Result = FindWire(LeftOperand);
+                    Result.InputState = true;                  
                 }
+            }      
+            if (Operator == null)
+            {
+                Wire Result = FindWire(LeftOperand);
+                Result.InputState = RightOperand1Value; 
             }
         }
+
+        private Wire FindWire(string leftOperand)
+        {
+            Wire foundWire = ParentSimulation.Wires.Find(wire => wire.Name == leftOperand);
+
+            // Wenn in der Wires-Liste nicht gefunden, in der Outputs-Liste suchen
+            if (foundWire == null)
+            {
+                foundWire = ParentSimulation.Outputs.Find(wire => wire.Name == leftOperand);
+            }
+
+            return foundWire;
+        }
+
         public bool FindWireValue(string operand)
         {
             if (ParentSimulation != null)

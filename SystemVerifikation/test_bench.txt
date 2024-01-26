@@ -1,0 +1,10 @@
+﻿// IWLS benchmark module "C17.iscas" printed on Wed Mar  6 23:40:18 2002
+module \C17.iscas (\1GAT(0) , \2GAT(1) , \3GAT(2) , \6GAT(3) , \7GAT(4) , \22GAT(10) , \23GAT(9) );
+input  Eingang1 ;
+input  Eingang2 ;
+output Ausgang1 ;
+wire   Wire1 ;
+
+  assign Ausgang1 = Wire1 ;
+  assign Wire1  = Eingang1 | Eingang2 ;
+end;

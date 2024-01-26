@@ -26,9 +26,7 @@ namespace SystemVerifikation
             {
                 assignment.ParentSimulation = this;
             }
-
-            var test = RunGoldenCircuit();
-           
+            var test = RunGoldenCircuit();      
         }
 
  
@@ -94,12 +92,8 @@ namespace SystemVerifikation
                 }
             }
 
-            // Create a new stack with the reversed order
-            Stack<Assignment> reversedStack = new Stack<Assignment>(stack);
-
-            return reversedStack;
+            return stack;
         }
-
 
         public List<List<bool>> RunGoldenCircuit()
         {
@@ -127,8 +121,9 @@ namespace SystemVerifikation
                 Stack<Assignment> tempSortedAssignments = new Stack<Assignment>(sortedAssignments); // Copy sorted assignments for this iteration
                 while (tempSortedAssignments.Count > 0)
                 {
-                    Assignment currentAssignment = tempSortedAssignments.Pop();
+                    Assignment currentAssignment = tempSortedAssignments.Peek();
                     currentAssignment.LogicOperation();
+                    tempSortedAssignments.Pop();
                 }
 
                 // Collect output values for this combination
@@ -139,13 +134,11 @@ namespace SystemVerifikation
                 }
 
                 // Store the collected output values
-                simulationResults.Add(currentOutput);
-
-                // Optionally, reset all wire values to false for the next combination
-                // ResetAllWires();
+                simulationResults.Add(currentOutput);               
             }
 
             return simulationResults;
+
         }
 
         public bool FindWireByName(string Operand)
@@ -153,22 +146,32 @@ namespace SystemVerifikation
             // Iterate through inputs to find the wire
             foreach (var wire in Inputs)
             {
-                if (wire.Name == Operand)                  
-                    return wire.GiveValue();
+                if (wire.Name == Operand)
+                {
+                    bool tmpValue = wire.GiveValue();
+                    return tmpValue;
+                }                  
+                    
             }
 
             // Iterate through outputs to find the wire
             foreach (var wire in Outputs)
             {
                 if (wire.Name == Operand)
-                    return wire.GiveValue();
+                {
+                    bool tmpValue = wire.GiveValue();
+                    return tmpValue;
+                }                 
             }
 
             // Iterate through internal wires to find the wire
             foreach (var wire in Wires)
             {
                 if (wire.Name == Operand)
-                    return wire.GiveValue();
+                {
+                    bool tmpValue = wire.GiveValue();
+                    return tmpValue;
+                }                   
             }
 
             return false; // Wire not found
