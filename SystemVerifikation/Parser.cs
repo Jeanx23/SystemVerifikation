@@ -10,9 +10,9 @@ namespace SystemVerifikation
 {
     public class Parser
     {
-        public List<Wire> ParseWires(string Filepath)
+        public List<Wire> ParseInputs(string Filepath)
         {
-            List<Wire> Wires = new List<Wire>();
+            List<Wire> Inputs = new List<Wire>();
             bool IsParsing = false;
 
             try
@@ -27,7 +27,7 @@ namespace SystemVerifikation
                         {
                             IsParsing = true;                            
                         }
-                        else if (line.Contains("assign"))
+                        else if (line.Contains("output"))
                         {
                             IsParsing = false;
                             break;
@@ -41,10 +41,100 @@ namespace SystemVerifikation
                                 if (!string.IsNullOrEmpty(trimmedWord))
                                 {
                                     trimmedWord = trimmedWord.Replace("input", string.Empty).Replace("output", string.Empty).Replace("wire", string.Empty).Trim();
-                                    Wires.Add(new Wire { Name = trimmedWord });
+                                    Inputs.Add(new Wire { Name = trimmedWord });
                                 }
                             }
                         }                    
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: " + e.Message);
+            }
+            return Inputs;
+        }
+
+        internal List<Wire> ParseOutputs(string Filepath)
+        {
+            List<Wire> Outputs = new List<Wire>();
+            bool IsParsing = false;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(Filepath))
+                {
+                    string line;
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line.Contains("output"))
+                        {
+                            IsParsing = true;
+                        }
+                        else if (line.Contains("wire"))
+                        {
+                            IsParsing = false;
+                            break;
+                        }
+                        if (IsParsing == true)
+                        {
+                            string[] words = line.Split(new char[] { ',', ';' });
+                            foreach (string word in words)
+                            {
+                                string trimmedWord = word.Trim();
+                                if (!string.IsNullOrEmpty(trimmedWord))
+                                {
+                                    trimmedWord = trimmedWord.Replace("input", string.Empty).Replace("output", string.Empty).Replace("wire", string.Empty).Trim();
+                                    Outputs.Add(new Wire { Name = trimmedWord });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: " + e.Message);
+            }
+            return Outputs;
+        }
+
+        internal List<Wire> ParseWires(string Filepath)
+        {
+            List<Wire> Wires = new List<Wire>();
+            bool IsParsing = false;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(Filepath))
+                {
+                    string line;
+
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line.Contains("wire"))
+                        {
+                            IsParsing = true;
+                        }
+                        else if (line.Contains("assign"))
+                        {
+                            IsParsing = false;
+                            break;
+                        }
+                        if (IsParsing == true)
+                        {
+                            string[] words = line.Split(new char[] { ',', ';' });
+                            foreach (string word in words)
+                            {
+                                string trimmedWord = word.Trim();
+                                if (!string.IsNullOrEmpty(trimmedWord))
+                                {
+                                    trimmedWord = trimmedWord.Replace("input", string.Empty).Replace("output", string.Empty).Replace("wire", string.Empty).Trim();
+                                    Wires.Add(new Wire { Name = trimmedWord });
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -57,7 +147,7 @@ namespace SystemVerifikation
 
         // Hier muss für jede Zeile die Wires Liste durchsucht werden und ein Assign Element erstellt werden. Der Assign Konstruktor enthält die Eingangswires, die Ausgangswires und die logischen Operationen
         // string Ergebnis = Wires.Find(s => s == gesuchterString);
-        public List<Assignment> ParseAssigns(string Filepath, List<Wire> Wires)
+        public List<Assignment> ParseAssigns(string Filepath)
         {
             List<Assignment> parsedAssignments = new List<Assignment>();
 
@@ -105,6 +195,9 @@ namespace SystemVerifikation
 
             if (match.Success)
             {
+                //match.groups[1].value in meinen allen 3 wire listen suchen 
+
+
                 assignment.LeftOperand = match.Groups[1].Value;
                 assignment.Operator = match.Groups[3].Success ? match.Groups[3].Value : null;
 
@@ -139,6 +232,5 @@ namespace SystemVerifikation
 
             return assignment;
         }
-
     }
 }

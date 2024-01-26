@@ -12,9 +12,13 @@ namespace SystemVerifikation
         {
             string Filepath = "C17_bench.txt";
 
-            Parser Parser = new Parser();
-            List<Wire> Wires  = Parser.ParseWires(Filepath);
-            List<Assignment> Assignments = Parser.ParseAssigns(Filepath, Wires);
+            Parser parser = new Parser();
+            List<Wire> inputs  = parser.ParseInputs(Filepath);
+            List<Wire> outputs = parser.ParseOutputs(Filepath);
+            List<Wire> wires = parser.ParseWires(Filepath);
+            List<Assignment> assignments = parser.ParseAssigns(Filepath);
+            
+            Simulation simulation = new Simulation(inputs, outputs, wires, assignments);
         }
     }
 }
