@@ -10,7 +10,7 @@ namespace SystemVerifikation
     {
         static void Main(string[] args)
         {
-            string Filepath = "C17_bench.txt";
+            string Filepath = "test_bench.txt";
 
             Parser parser = new Parser();
             List<Wire> inputs  = parser.ParseInputs(Filepath);

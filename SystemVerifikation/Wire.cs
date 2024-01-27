@@ -16,7 +16,7 @@ namespace SystemVerifikation
 
         public bool GiveValue()
         {
-            if (FaultedBool)
+            if (this.FaultedBool)
             {
                 return FaultedValue;
             }

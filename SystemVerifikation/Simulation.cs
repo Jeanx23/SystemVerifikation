@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,35 +23,133 @@ namespace SystemVerifikation
             Wires = wires ?? throw new ArgumentNullException(nameof(wires), "Wires list cannot be null");
             Assignments = assignments ?? throw new ArgumentNullException(nameof(assignments), "Assignments list cannot be null");
             
+
             foreach (var assignment in Assignments)
             {
                 assignment.ParentSimulation = this;
             }
             var ResultsGoldenCircuit = RunGoldenCircuit();
-            int i = 0; // counter
-            foreach(var Result in ResultsGoldenCircuit)
+            PrintResults(ResultsGoldenCircuit);
+            var ResultsBadCircuit = RunBadCircuit();           
+            RunCompareCircuit(ResultsGoldenCircuit,ResultsBadCircuit);
+            Console.ReadLine();
+        }
+
+        public void PrintResults(List<List<KeyValuePair<String, bool>>> Results)
+        {
+            int numInputs = Inputs.Count;
+            int numOutputs = Outputs.Count;
+            int numCombinations = 1 << numInputs;
+            int x = 1; // counter
+            int i = 0;
+            foreach (var Result in Results)
             {
-                i++;
-                Console.WriteLine("Result" + i);
-                foreach(var Item in Result)
+                Console.WriteLine("Inputs for Result" + " " + x + ":");
+                for (int j = 0; j < numInputs; ++j)
+                {
+                    bool inputValue = ((i >> j) & 1) == 1;
+                    Console.WriteLine(inputValue);
+                }
+                Console.WriteLine("Result" + " " + x + ":");
+                foreach (var Item in Result)
                 {
                     Console.WriteLine(Item);
                 }
+                Console.WriteLine();
+                Console.WriteLine();
+                x++;
+                i++;
             }
-            Console.ReadLine();
-
-            var ResultsBadCircuit = RunBadCircuit();
-            var CompareCircuits = RunCompareCircuit();
+        }
+        private void RunCompareCircuit(List<List<KeyValuePair<String, bool>>> GoldenCircuitResults, List<KeyValuePair<String, List<List<KeyValuePair<String, bool>>>>> BadCircuitResults)
+        {
+            int i = 0;
+            List<Wire> FaultableWires = GiveInputsAndWires();
+            
+            foreach (Wire wire in FaultableWires)
+            {
+                Console.WriteLine("Test of wire: " + wire.Name);
+                var StuckAtFalse = AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i]);
+                var StuckAtTrue = AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i + 1]);
+                KeyValuePair<String, bool>[] StuckAtCases = {StuckAtFalse, StuckAtTrue};
+                PrintStuckAtFaults(StuckAtCases);
+                i++;
+            }
         }
 
-        private object RunCompareCircuit()
+        private void PrintStuckAtFaults(KeyValuePair<String, bool>[] StuckAtCases)
         {
-            throw new NotImplementedException();
+            foreach (var StuckAtCase in StuckAtCases)
+            {
+                if(!StuckAtCase.Value)
+                {
+                    Console.WriteLine("Stuck at error not detectet at: " + StuckAtCase.Key);
+                }
+                else
+                {
+                    Console.WriteLine("Stuck at error detectet at: " + StuckAtCase.Key);
+                }
+            }              
         }
 
-        private object RunBadCircuit()
+        public KeyValuePair<String,bool> AreResultsEqual(List<List<KeyValuePair<String, bool>>> GoldenCircuitResults, KeyValuePair<String, List<List<KeyValuePair<String, bool>>>> BadResults)
         {
-            throw new NotImplementedException();
+            KeyValuePair<String, bool> EqualCheck = new KeyValuePair<String, bool>(BadResults.Key, false);
+            Console.WriteLine("Testing Stuck At: " + BadResults.Key);
+            if (GoldenCircuitResults.Count != BadResults.Value.Count)
+            {
+                EqualCheck = new KeyValuePair<string, bool>(BadResults.Key,true);
+                return EqualCheck;
+            }         
+            foreach (var goldenResultsList in GoldenCircuitResults)
+            {
+                foreach (var goldenResult in goldenResultsList)
+                {
+                    int j = GoldenCircuitResults.IndexOf(goldenResultsList);
+                    int i = goldenResultsList.IndexOf(goldenResult);
+
+                    var BadResult = BadResults.Value[j][i];
+
+                    if (goldenResult.Value == BadResult.Value)
+                    {
+                        EqualCheck = new KeyValuePair<string, bool>(BadResults.Key, true);
+                    }
+                }
+            }
+            return EqualCheck;
+        }
+
+        public List<KeyValuePair<String, List<List<KeyValuePair<String, bool>>>>> RunBadCircuit()
+        {          
+            List<Wire> FaultableWires = GiveInputsAndWires();            
+            List<KeyValuePair<String,List<List<KeyValuePair<String, bool>>>>> BadCircuitSimulationResults = new List<KeyValuePair<String, List<List<KeyValuePair<String, bool>>>>>();
+            foreach (Wire wire in  FaultableWires) 
+            {               
+                wire.SetFault(true, false); // Setze das Wire Stuck at 0
+                var TmpBadStuckAtFalseResult = RunGoldenCircuit();           
+                KeyValuePair<String, List<List<KeyValuePair<String, bool>>>> StuckAtFalse = new KeyValuePair<string, List<List<KeyValuePair<string, bool>>>>("StuckAtFalse", TmpBadStuckAtFalseResult);
+                BadCircuitSimulationResults.Add(StuckAtFalse);
+
+                wire.SetFault(true, true);  // Setze das Wire Stuck at 1
+                var TmpBadStuckAtTrueResult = RunGoldenCircuit();
+                KeyValuePair<String, List<List<KeyValuePair<String, bool>>>> StuckAtTrue = new KeyValuePair<string, List<List<KeyValuePair<string, bool>>>>("StuckAtTrue", TmpBadStuckAtTrueResult);
+                BadCircuitSimulationResults.Add(StuckAtTrue);
+
+                Console.WriteLine("Stuck at 1 / True at: " + wire.Name);
+                PrintResults(TmpBadStuckAtTrueResult);
+                Console.WriteLine("Stuck at 0 / False");
+                PrintResults(TmpBadStuckAtFalseResult);
+                wire.SetFault(false, true);
+            }
+            return BadCircuitSimulationResults; // Results für alle Wires für Stuck at 0 und Stuck at 1
+        }
+
+        private List<Wire> GiveInputsAndWires()
+        {
+            List<Wire> InputsWires = new List<Wire>();
+            InputsWires.AddRange(Wires);
+            InputsWires.AddRange(Inputs);
+            return InputsWires;
         }
 
         public void BuiltGraph()
@@ -137,7 +236,7 @@ namespace SystemVerifikation
                 for (int j = 0; j < numInputs; ++j)
                 {
                     bool inputValue = ((i >> j) & 1) == 1;
-                    Inputs[j].InputState = inputValue;
+                    Inputs[j].InputState = inputValue;                  
                 }
 
                 // Compute outputs using topologically sorted assignments
@@ -163,14 +262,13 @@ namespace SystemVerifikation
         public bool FindWireByName(string Operand)
         {
             // Iterate through inputs to find the wire
-            foreach (var wire in Inputs)
+            foreach (var wire in GiveInputsAndWires())
             {
                 if (wire.Name == Operand)
                 {
                     bool tmpValue = wire.GiveValue();
                     return tmpValue;
-                }                  
-                    
+                }                                     
             }
 
             // Iterate through outputs to find the wire
