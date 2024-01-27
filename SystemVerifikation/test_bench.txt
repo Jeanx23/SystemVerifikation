@@ -3,8 +3,12 @@ module \C17.iscas (\1GAT(0) , \2GAT(1) , \3GAT(2) , \6GAT(3) , \7GAT(4) , \22GAT
 input  Eingang1 ;
 input  Eingang2 ;
 output Ausgang1 ;
+output Ausgang2 ;
 wire   Wire1 ;
+wire   Wire2 ;
 
-  assign Ausgang1 = Wire1 ;
-  assign Wire1  = Eingang1 | Eingang2 ;
+  assign Wire1 = Eingang1 & Eingang2 ;
+  assign Ausgang2 = Wire1 | Eingang1 ;
+  assign Ausgang1 = Wire2;
+  assign Wire2 = Eingang2;
 end;

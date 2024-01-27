@@ -38,7 +38,12 @@ namespace SystemVerifikation
                 {
                     Wire Result = FindWire(LeftOperand);
                     Result.InputState = true;
-                }    
+                }
+                else
+                {
+                    Wire Result = FindWire(LeftOperand);
+                    Result.InputState = false;
+                }
             }           
             if (Operator == "&")
             {
@@ -46,6 +51,11 @@ namespace SystemVerifikation
                 {                    
                     Wire Result = FindWire(LeftOperand);
                     Result.InputState = true;                  
+                }
+                else
+                {
+                    Wire Result = FindWire(LeftOperand);
+                    Result.InputState = false;
                 }
             }      
             if (Operator == null)

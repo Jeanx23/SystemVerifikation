@@ -26,10 +26,33 @@ namespace SystemVerifikation
             {
                 assignment.ParentSimulation = this;
             }
-            var test = RunGoldenCircuit();      
+            var ResultsGoldenCircuit = RunGoldenCircuit();
+            int i = 0; // counter
+            foreach(var Result in ResultsGoldenCircuit)
+            {
+                i++;
+                Console.WriteLine("Result" + i);
+                foreach(var Item in Result)
+                {
+                    Console.WriteLine(Item);
+                }
+            }
+            Console.ReadLine();
+
+            var ResultsBadCircuit = RunBadCircuit();
+            var CompareCircuits = RunCompareCircuit();
         }
 
- 
+        private object RunCompareCircuit()
+        {
+            throw new NotImplementedException();
+        }
+
+        private object RunBadCircuit()
+        {
+            throw new NotImplementedException();
+        }
+
         public void BuiltGraph()
         {
             adjList = new Dictionary<Assignment, List<Assignment>>();
@@ -95,7 +118,7 @@ namespace SystemVerifikation
             return stack;
         }
 
-        public List<List<bool>> RunGoldenCircuit()
+        public List<List<KeyValuePair<String, bool>>> RunGoldenCircuit()
         {
             int numInputs = Inputs.Count;
             int numOutputs = Outputs.Count;
@@ -107,7 +130,7 @@ namespace SystemVerifikation
             // Perform topological sort to get assignments in the order they should be computed
             Stack<Assignment> sortedAssignments = TopologicalSort();
 
-            List<List<bool>> simulationResults = new List<List<bool>>();
+            List<List<KeyValuePair<String, bool>>> simulationResults = new List<List<KeyValuePair<String, bool>>>();
 
             for (int i = 0; i < numCombinations; ++i)
             {
@@ -118,21 +141,17 @@ namespace SystemVerifikation
                 }
 
                 // Compute outputs using topologically sorted assignments
-                Stack<Assignment> tempSortedAssignments = new Stack<Assignment>(sortedAssignments); // Copy sorted assignments for this iteration
+                Stack<Assignment> tempSortedAssignments = new Stack<Assignment>(sortedAssignments.Reverse()); // Copy sorted assignments for this iteration
                 while (tempSortedAssignments.Count > 0)
                 {
-                    Assignment currentAssignment = tempSortedAssignments.Peek();
-                    currentAssignment.LogicOperation();
-                    tempSortedAssignments.Pop();
-                }
-
-                // Collect output values for this combination
-                List<bool> currentOutput = new List<bool>();
+                    Assignment currentAssignment = tempSortedAssignments.Pop();
+                    currentAssignment.LogicOperation();                 
+                }              
+                List<KeyValuePair<String,bool>> currentOutput = new List<KeyValuePair<String,bool>>();
                 for (int k = 0; k < numOutputs; ++k)
                 {
-                    currentOutput.Add(Outputs[k].GiveValue());
+                    currentOutput.Add(new KeyValuePair<string, bool>(Outputs[k].Name, Outputs[k].GiveValue()));
                 }
-
                 // Store the collected output values
                 simulationResults.Add(currentOutput);               
             }
