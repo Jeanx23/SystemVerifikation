@@ -31,6 +31,7 @@ namespace SystemVerifikation
             var ResultsGoldenCircuit = RunGoldenCircuit();
             PrintResults(ResultsGoldenCircuit);
             var ResultsBadCircuit = RunBadCircuit();           
+
             RunCompareCircuit(ResultsGoldenCircuit,ResultsBadCircuit);
             Console.ReadLine();
         }
@@ -65,60 +66,64 @@ namespace SystemVerifikation
         {
             int i = 0;
             List<Wire> FaultableWires = GiveInputsAndWires();
-            
-            foreach (Wire wire in FaultableWires)
+
+            while (i + 1 < BadCircuitResults.Count) // Überprüfe auf Indexüberlauf
             {
+                Wire wire = FaultableWires[i / 2];
+                Console.WriteLine();
+                Console.WriteLine("---------------------------------------------");
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Test of wire: " + wire.Name);
-                var StuckAtFalse = AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i]);
-                var StuckAtTrue = AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i + 1]);
-                KeyValuePair<String, bool>[] StuckAtCases = {StuckAtFalse, StuckAtTrue};
-                PrintStuckAtFaults(StuckAtCases);
-                i++;
+                Console.ResetColor(); 
+                Console.WriteLine();
+                AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i]);                
+                AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i + 1]);
+                           
+                i += 2;
             }
         }
-
-        private void PrintStuckAtFaults(KeyValuePair<String, bool>[] StuckAtCases)
+        public void AreResultsEqual(List<List<KeyValuePair<string, bool>>> goldenCircuitResults, KeyValuePair<string, List<List<KeyValuePair<string, bool>>>> badResults)
         {
-            foreach (var StuckAtCase in StuckAtCases)
+            Console.WriteLine("Testing of: " + badResults.Key); 
+            if (goldenCircuitResults.Count != badResults.Value.Count)
             {
-                if(!StuckAtCase.Value)
-                {
-                    Console.WriteLine("Stuck at error not detectet at: " + StuckAtCase.Key);
-                }
-                else
-                {
-                    Console.WriteLine("Stuck at error detectet at: " + StuckAtCase.Key);
-                }
-            }              
-        }
+                Console.WriteLine("Computing Error: Count of Golden Circuit Outputs != Count of Bad Circuit Outputs");
+            }
 
-        public KeyValuePair<String,bool> AreResultsEqual(List<List<KeyValuePair<String, bool>>> GoldenCircuitResults, KeyValuePair<String, List<List<KeyValuePair<String, bool>>>> BadResults)
-        {
-            KeyValuePair<String, bool> EqualCheck = new KeyValuePair<String, bool>(BadResults.Key, false);
-            Console.WriteLine("Testing Stuck At: " + BadResults.Key);
-            if (GoldenCircuitResults.Count != BadResults.Value.Count)
+            for (int j = 0; j < goldenCircuitResults.Count; j++)
             {
-                EqualCheck = new KeyValuePair<string, bool>(BadResults.Key,true);
-                return EqualCheck;
-            }         
-            foreach (var goldenResultsList in GoldenCircuitResults)
-            {
-                foreach (var goldenResult in goldenResultsList)
+                var goldenResultsList = goldenCircuitResults[j];
+                var badResultList = badResults.Value[j];
+
+                if (!goldenResultsList.SequenceEqual(badResultList, KeyValuePairComparer.Instance))
                 {
-                    int j = GoldenCircuitResults.IndexOf(goldenResultsList);
-                    int i = goldenResultsList.IndexOf(goldenResult);
+                    Console.WriteLine("Stuck At Detected with Input States: ");
 
-                    var BadResult = BadResults.Value[j][i];
-
-                    if (goldenResult.Value == BadResult.Value)
+                    int numInputs = Inputs.Count;
+                    int numCombinations = 1 << numInputs;
+                    for (int k = 0; k < numInputs; ++k)
                     {
-                        EqualCheck = new KeyValuePair<string, bool>(BadResults.Key, true);
+                        bool inputValue = ((j >> k) & 1) == 1;
+                        Console.Write($"{Inputs[k].Name}: {inputValue} ");
                     }
+                    Console.WriteLine();
+                }
+                else 
+                {
+                    Console.WriteLine("Stuck At not Detected with Input States: ");
+
+                    int numInputs = Inputs.Count;
+                    int numCombinations = 1 << numInputs;
+                    for (int k = 0; k < numInputs; ++k)
+                    {
+                        bool inputValue = ((j >> k) & 1) == 1;
+                        Console.Write($"{Inputs[k].Name}: {inputValue} ");
+                    }
+                    Console.WriteLine();
                 }
             }
-            return EqualCheck;
-        }
-
+            Console.WriteLine();
+        }       
         public List<KeyValuePair<String, List<List<KeyValuePair<String, bool>>>>> RunBadCircuit()
         {          
             List<Wire> FaultableWires = GiveInputsAndWires();            
@@ -143,7 +148,6 @@ namespace SystemVerifikation
             }
             return BadCircuitSimulationResults; // Results für alle Wires für Stuck at 0 und Stuck at 1
         }
-
         private List<Wire> GiveInputsAndWires()
         {
             List<Wire> InputsWires = new List<Wire>();
@@ -151,7 +155,6 @@ namespace SystemVerifikation
             InputsWires.AddRange(Inputs);
             return InputsWires;
         }
-
         public void BuiltGraph()
         {
             adjList = new Dictionary<Assignment, List<Assignment>>();
@@ -216,7 +219,6 @@ namespace SystemVerifikation
 
             return stack;
         }
-
         public List<List<KeyValuePair<String, bool>>> RunGoldenCircuit()
         {
             int numInputs = Inputs.Count;
@@ -258,7 +260,6 @@ namespace SystemVerifikation
             return simulationResults;
 
         }
-
         public bool FindWireByName(string Operand)
         {
             // Iterate through inputs to find the wire
