@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,8 +75,13 @@ namespace SystemVerifikation
                 Console.WriteLine("---------------------------------------------");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Test of wire: " + wire.Name);
-                Console.ResetColor(); 
+                Console.ResetColor();
                 Console.WriteLine();
+                using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+                {
+                    writer.WriteLine("Test of wire: " + wire.Name);
+                }
+                
                 AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i]);                
                 AreResultsEqual(GoldenCircuitResults, BadCircuitResults[i + 1]);
                            
@@ -84,7 +90,13 @@ namespace SystemVerifikation
         }
         public void AreResultsEqual(List<List<KeyValuePair<string, bool>>> goldenCircuitResults, KeyValuePair<string, List<List<KeyValuePair<string, bool>>>> badResults)
         {
-            Console.WriteLine("Testing of: " + badResults.Key); 
+            Console.WriteLine("Testing of: " + badResults.Key);
+            using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+            {
+                writer.WriteLine();
+                writer.WriteLine("Testing of: " + badResults.Key);
+                writer.WriteLine();
+            }
             if (goldenCircuitResults.Count != badResults.Value.Count)
             {
                 Console.WriteLine("Computing Error: Count of Golden Circuit Outputs != Count of Bad Circuit Outputs");
@@ -98,26 +110,40 @@ namespace SystemVerifikation
                 if (!goldenResultsList.SequenceEqual(badResultList, KeyValuePairComparer.Instance))
                 {
                     Console.WriteLine("Stuck At Detected with Input States: ");
-
+                    using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+                    {
+                        writer.WriteLine("Stuck At Detected with Input States: ");
+                    }
                     int numInputs = Inputs.Count;
                     int numCombinations = 1 << numInputs;
                     for (int k = 0; k < numInputs; ++k)
                     {
                         bool inputValue = ((j >> k) & 1) == 1;
                         Console.Write($"{Inputs[k].Name}: {inputValue} ");
+                        using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+                        {
+                            writer.WriteLine($"{Inputs[k].Name}: {inputValue} ");
+                        }
                     }
                     Console.WriteLine();
                 }
                 else 
                 {
                     Console.WriteLine("Stuck At not Detected with Input States: ");
-
+                    using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+                    {
+                        writer.WriteLine("Stuck At not Detected with Input States: ");
+                    }
                     int numInputs = Inputs.Count;
                     int numCombinations = 1 << numInputs;
                     for (int k = 0; k < numInputs; ++k)
                     {
                         bool inputValue = ((j >> k) & 1) == 1;
                         Console.Write($"{Inputs[k].Name}: {inputValue} ");
+                        using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath, true))
+                        {
+                            writer.WriteLine($"{Inputs[k].Name}: {inputValue} ");
+                        }
                     }
                     Console.WriteLine();
                 }
@@ -231,7 +257,7 @@ namespace SystemVerifikation
             // Perform topological sort to get assignments in the order they should be computed
             Stack<Assignment> sortedAssignments = TopologicalSort();
 
-            List<List<KeyValuePair<String, bool>>> simulationResults = new List<List<KeyValuePair<String, bool>>>();
+            List<List<KeyValuePair<string, bool>>> simulationResults = new List<List<KeyValuePair<String, bool>>>();
 
             for (int i = 0; i < numCombinations; ++i)
             {
@@ -248,7 +274,7 @@ namespace SystemVerifikation
                     Assignment currentAssignment = tempSortedAssignments.Pop();
                     currentAssignment.LogicOperation();                 
                 }              
-                List<KeyValuePair<String,bool>> currentOutput = new List<KeyValuePair<String,bool>>();
+                List<KeyValuePair<string, bool>> currentOutput = new List<KeyValuePair<string, bool>>();
                 for (int k = 0; k < numOutputs; ++k)
                 {
                     currentOutput.Add(new KeyValuePair<string, bool>(Outputs[k].Name, Outputs[k].GiveValue()));
