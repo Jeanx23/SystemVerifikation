@@ -21,10 +21,9 @@ namespace SystemVerifikation
             }
             else
             {
-                // Aufforderung zur Eingabe des Dateipfads, wenn kein Befehlszeilenargument vorhanden ist
-                /*Console.Write("Bitte geben Sie den Dateipfad ein: ");
-                filePath = Console.ReadLine();*/
-                filePath = "C17_bench.txt";
+                //Aufforderung zur Eingabe des Dateipfads, wenn kein Befehlszeilenargument vorhanden ist
+                Console.Write("Bitte geben Sie den Dateipfad ein: ");
+                filePath = Console.ReadLine();         
             }
 
             using (StreamWriter writer = new StreamWriter(StaticSettings.OutputPath))

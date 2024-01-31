@@ -40,8 +40,6 @@ namespace SystemVerifikation
         public void PrintResults(List<List<KeyValuePair<String, bool>>> Results)
         {
             int numInputs = Inputs.Count;
-            int numOutputs = Outputs.Count;
-            int numCombinations = 1 << numInputs;
             int x = 1; // counter
             int i = 0;
             foreach (var Result in Results)
@@ -250,6 +248,15 @@ namespace SystemVerifikation
             int numInputs = Inputs.Count;
             int numOutputs = Outputs.Count;
             int numCombinations = 1 << numInputs;
+
+            if (numCombinations > 32) // If computung time will be to high - reduce the number of Input Combinations
+            {
+                numCombinations = 16;         
+            }
+            else
+            {
+                numCombinations = 1 << numInputs;
+            }
 
             // Build the graph for the circuit
             BuiltGraph();
