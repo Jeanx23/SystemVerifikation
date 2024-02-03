@@ -12,16 +12,12 @@ namespace SystemVerifikation
         static void Main(string[] args)
         {
             string filePath;
-
-            // Überprüfen, ob Befehlszeilenargumente vorhanden sind
             if (args.Length > 0)
             {
-                // Verwenden Sie das erste Befehlszeilenargument als Dateipfad
                 filePath = args[0];
             }
             else
             {
-                //Aufforderung zur Eingabe des Dateipfads, wenn kein Befehlszeilenargument vorhanden ist
                 Console.Write("Bitte geben Sie den Dateipfad ein: ");
                 filePath = Console.ReadLine();         
             }

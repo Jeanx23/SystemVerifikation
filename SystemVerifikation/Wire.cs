@@ -10,8 +10,8 @@ namespace SystemVerifikation
     {
         public string Name { get; set; }        
         public bool InputState { get; set; } 
-        public bool FaultedBool { get; set; } // Ich bin stuck, ja oder nein
-        public bool FaultedValue { get; set; } // Wert auf das der Value stuck ist
+        public bool FaultedBool { get; set; } // I am Stuck - Yes / No
+        public bool FaultedValue { get; set; } 
 
 
         public bool GiveValue()

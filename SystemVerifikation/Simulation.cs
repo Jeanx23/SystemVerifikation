@@ -40,7 +40,7 @@ namespace SystemVerifikation
         public void PrintResults(List<List<KeyValuePair<String, bool>>> Results)
         {
             int numInputs = Inputs.Count;
-            int x = 1; // counter
+            int x = 1; 
             int i = 0;
             foreach (var Result in Results)
             {
@@ -112,8 +112,7 @@ namespace SystemVerifikation
                     {
                         writer.WriteLine("Stuck At Detected with Input States: ");
                     }
-                    int numInputs = Inputs.Count;
-                    int numCombinations = 1 << numInputs;
+                    int numInputs = Inputs.Count;                  
                     for (int k = 0; k < numInputs; ++k)
                     {
                         bool inputValue = ((j >> k) & 1) == 1;
@@ -133,7 +132,6 @@ namespace SystemVerifikation
                         writer.WriteLine("Stuck At not Detected with Input States: ");
                     }
                     int numInputs = Inputs.Count;
-                    int numCombinations = 1 << numInputs;
                     for (int k = 0; k < numInputs; ++k)
                     {
                         bool inputValue = ((j >> k) & 1) == 1;
@@ -179,7 +177,7 @@ namespace SystemVerifikation
             InputsWires.AddRange(Inputs);
             return InputsWires;
         }
-        public void BuiltGraph()
+        public void BuildGraph()
         {
             adjList = new Dictionary<Assignment, List<Assignment>>();
             adjList.Clear();
@@ -217,7 +215,6 @@ namespace SystemVerifikation
                     }
                 }
             }
-
             // Push current assignment to stack which stores the result
             stack.Push(assignment);
         }
@@ -259,7 +256,7 @@ namespace SystemVerifikation
             }
 
             // Build the graph for the circuit
-            BuiltGraph();
+            BuildGraph();
 
             // Perform topological sort to get assignments in the order they should be computed
             Stack<Assignment> sortedAssignments = TopologicalSort();
